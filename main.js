@@ -15,94 +15,62 @@ const observer = new IntersectionObserver(entries => {
 }, { threshold: 0.1 });
 document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-// ── GITHUB API ──
-const USERNAME = 'nshutilancelot3';
-const ICONS = {
-  JavaScript: '🟨', Python: '🐍', HTML: '🌐', CSS: '🎨',
-  TypeScript: '🔷', Java: '☕', C: '⚙️', 'C++': '⚙️', Shell: '🖥️', default: '📁'
-};
+// ── HARDCODED PROJECTS ──
+const PROJECTS = [
+  {
+    name: 'Tuto Archive',
+    desc: 'Full-stack YouTube study-resource finder for ALU students. Node.js/Express proxy keeps the API key server-side, lazy-loading preserves quota. Deployed on 2 Ubuntu servers behind HAProxy with SSL termination and Nginx reverse proxy.',
+    icon: '📚',
+    langs: ['JavaScript', 'Node.js', 'CSS'],
+    github: 'https://github.com/nshutilancelot3/Tutorial-Archive',
+    live: 'https://tutoarchive.lancewreal.tech',
+  },
+  {
+    name: 'Lance Tracker',
+    desc: 'Zero-dependency, mobile-first student finance manager. Real-time analytics dashboard, regex-powered search, JSON import/export, dark/light theme, and full WCAG AA accessibility with ARIA live regions and keyboard navigation.',
+    icon: '💰',
+    langs: ['JavaScript', 'HTML', 'CSS'],
+    github: 'https://github.com/nshutilancelot3/lance_tracker',
+    live: 'https://nshutilancelot3.github.io/lance_tracker/',
+  },
+  {
+    name: 'Submission Reminder App',
+    desc: 'Shell-based reminder system that tracks assignment deadlines and alerts students via terminal notifications. Built entirely in Bash with modular script architecture and environment-driven configuration.',
+    icon: '🔔',
+    langs: ['Shell', 'Bash'],
+    github: 'https://github.com/nshutilancelot3/submission-reminder_app_nshutilancelot3',
+    live: null,
+  },
+];
 
-async function fetchGitHub() {
-  try {
-    const res = await fetch(`https://api.github.com/users/${USERNAME}/repos?per_page=100&sort=updated`);
-    if (!res.ok) throw new Error('API error');
-    const repos = await res.json();
-    renderProjects(repos);
-  } catch (err) {
-    console.error(err);
-    renderFallback();
-  }
-}
-
-function renderProjects(repos) {
+function renderProjects() {
   const grid = document.getElementById('projects-grid');
-  const filtered = repos.filter(r => !r.fork).slice(0, 8);
-
   grid.innerHTML = '';
 
-  // Always show ALU Projects card first
-  const aluCard = document.createElement('div');
-  aluCard.className = 'project-card fade-in';
-  aluCard.innerHTML = `
-    <div class="card-header">
-      <span class="card-icon">🎓</span>
-      <div class="card-links">
-        <a class="card-link" href="https://github.com/${USERNAME}" target="_blank">GitHub ↗</a>
-      </div>
-    </div>
-    <div class="card-title">ALU Projects</div>
-    <div class="card-desc">Academic projects from African Leadership University.</div>
-  `;
-  grid.appendChild(aluCard);
-  observer.observe(aluCard);
+  PROJECTS.forEach((project, i) => {
+    const langs = project.langs.map(l => `<span class="lang-tag">${l}</span>`).join('');
+    const liveLink = project.live
+      ? `<a class="card-link" href="${project.live}" target="_blank">Live ↗</a>`
+      : '';
 
-  filtered.forEach((repo, i) => {
-    const icon = ICONS[repo.language] || ICONS.default;
-    const langs = repo.language ? `<span class="lang-tag">${repo.language}</span>` : '';
-    const stars = repo.stargazers_count > 0 ? `<div class="card-stars">★ ${repo.stargazers_count}</div>` : '';
     const card = document.createElement('div');
     card.className = 'project-card fade-in';
-    card.style.transitionDelay = ((i + 1) * 0.07) + 's';
+    card.style.transitionDelay = (i * 0.1) + 's';
     card.innerHTML = `
       <div class="card-header">
-        <span class="card-icon">${icon}</span>
+        <span class="card-icon">${project.icon}</span>
         <div class="card-links">
-          <a class="card-link" href="${repo.html_url}" target="_blank">GitHub ↗</a>
-          ${repo.homepage ? `<a class="card-link" href="${repo.homepage}" target="_blank">Live ↗</a>` : ''}
+          <a class="card-link" href="${project.github}" target="_blank">GitHub ↗</a>
+          ${liveLink}
         </div>
       </div>
-      <div class="card-title">${repo.name.replace(/-/g, ' ').replace(/_/g, ' ')}</div>
-      <div class="card-desc">${repo.description || 'A project by Nshuti Lancelot.'}</div>
+      <div class="card-title">${project.name}</div>
+      <div class="card-desc">${project.desc}</div>
       <div class="card-langs">${langs}</div>
-      ${stars}
     `;
     grid.appendChild(card);
     observer.observe(card);
   });
 }
 
-function renderFallback() {
-  const grid = document.getElementById('projects-grid');
-  const fallbacks = [
-    { name: 'ALU Projects', desc: 'Academic projects from African Leadership University.', icon: '🎓' },
-  ];
-  grid.innerHTML = '';
-  fallbacks.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'project-card fade-in';
-    card.innerHTML = `
-      <div class="card-header">
-        <span class="card-icon">${p.icon}</span>
-        <div class="card-links">
-          <a class="card-link" href="https://github.com/${USERNAME}" target="_blank">GitHub ↗</a>
-        </div>
-      </div>
-      <div class="card-title">${p.name}</div>
-      <div class="card-desc">${p.desc}</div>
-    `;
-    grid.appendChild(card);
-    observer.observe(card);
-  });
-}
-
-fetchGitHub();
+renderProjects();
